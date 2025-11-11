@@ -54,7 +54,8 @@ endif()
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 include_directories( ${OPENGL_INCLUDE_DIRS} )
 
-target_link_libraries(tpsp ${OPENGL_LIBRARIES} GLUT::GLUT)
+target_link_libraries(tpsp ${OPENGL_LIBRARIES} GLUT::GLUT Eigen3::Eigen)
