@@ -93,7 +93,7 @@ static int lastX=0, lastY=0;
 static glm::mat4 gProj(1), gMV(1), gMVP(1);
 
 static void usage(const char* argv0){
-  std::puts("=== Two-Pass Shock Propagation (Fig.1-3) Minimal Demo ===");
+  std::puts("=== Two-Pass Shock Propagation for Stable Stacking with Gauss-Seidel (Fig.1-3) Minimal Demo ===");
   std::printf("Usage: %s\n", argv0);
   std::puts("\nMouse:");
   std::puts("  Left-drag   : rotate camera (yaw/pitch)");
@@ -209,7 +209,7 @@ static void SolveContactTopBody(const std::vector<int>& layer){
         RigidBody& bot = gBodies[c.idxBot];
         RigidBody& top = gBodies[c.idxTop];
 
-        // arms from COM to contact points
+        // arms from COM(Center Of Mass) to contact points
         Eigen::Vector3f rBot = Eigen::Vector3f(c.pBot.x - bot.x.x, c.pBot.y - bot.x.y, c.pBot.z - bot.x.z);
         Eigen::Vector3f rTop = Eigen::Vector3f(c.pTop.x - top.x.x, c.pTop.y - top.x.y, c.pTop.z - top.x.z);
 
@@ -285,7 +285,7 @@ static void SolveContactShock_DownwardOnly(){
     const auto& layer = gLayers[L];
     SolveContactTopBody(layer); // top fixed point for this layer
 
-    // Apply accumulated bottom impulses (Alg.2 lines 8?11)
+    // Apply accumulated bottom impulses (Alg.2 lines 8-11)
     for(int ci : layer){
       Contact& c = gContacts[ci];
       if(glm::dot(c.Jbot_accum, c.Jbot_accum) > 0.f){
@@ -527,7 +527,7 @@ int main(int argc,char** argv){
 #endif
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
   glutInitWindowSize(gWinW, gWinH);
-  glutCreateWindow("Two-Pass Shock Propagation (Fig.1?3) - GLUT + GLM + Eigen");
+  glutCreateWindow("Two-Pass Shock Propagation for Stable Stacking with Gauss-Seidel");
 
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_POINT_SMOOTH);
