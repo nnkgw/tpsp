@@ -1,4 +1,3 @@
-// main_2psp_demo.cpp
 // Two-Pass Shock Propagation (2PSP) minimal demo for Fig.1,2,3
 // Libraries: freeglut (GLUT), GLM, Eigen only.
 // Camera, mouse/keyboard usage are implemented in a style similar to the provided gheat.cpp.  (see usage())
@@ -84,9 +83,9 @@ static const float mu = 0.5f;       // friction coefficient (for Eq.(6))
 static const float epsConverge = 1e-6f;
 static const int   maxIterPerLayer = 75;
 
-// ====== Camera (similar style to gheat.cpp) ======
+// ====== Camera  ======
 static int gWinW = 1280, gWinH = 800;
-static float camDist = 8.0f;
+static float camDist = 0.6f;
 static float yawRad = 0.6f, pitchRad = 0.3f;
 static float panX = 0.f, panY = 0.f;
 static bool lbtn=false, rbtn=false;
@@ -397,8 +396,8 @@ static void setProjectionAndView(){
   glLoadIdentity();
 
   glm::mat4 R = glm::yawPitchRoll(yawRad, pitchRad, 0.0f);
-  glm::vec3 sc(0,0.2f,0);
-  glm::vec3 eye = sc + glm::vec3(R * glm::vec4(0, 0, camDist, 1));
+  glm::vec3 sc(0,0.75f,0);
+  glm::vec3 eye = sc + glm::vec3(R * glm::vec4(0, 0.5, camDist, 1));
   glm::mat4 V = glm::lookAt(eye, sc, glm::vec3(0,1,0));
   glm::mat4 T = glm::translate(glm::mat4(1), glm::vec3(panX, panY, 0));
   gMV = V * T;
@@ -421,7 +420,7 @@ static void drawBox(const RigidBody& b, const float col[3]){
 static void drawGround(const RigidBody& g){
   glPushMatrix();
   glm::mat4 M(1.0f);
-  M = glm::translate(M, g.x + V3(0, g.half.y, 0));
+  M = glm::translate(M, g.x);                  // center ground at y=0
   M = glm::scale(M, g.half*2.0f);
   glMultMatrixf(&M[0][0]);
   float col[3]={0.25f,0.3f,0.32f};
@@ -449,7 +448,7 @@ static void drawImpulses(){
   glEnd();
 }
 
-static void displayCB(){
+static void display(){
   glViewport(0,0,gWinW,gWinH);
   glClearColor(0.08f,0.08f,0.1f,1.f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -470,9 +469,9 @@ static void displayCB(){
   glutSwapBuffers();
 }
 
-static void reshapeCB(int w,int h){ gWinW = std::max(1,w); gWinH = std::max(1,h); glutPostRedisplay(); }
+static void reshape(int w,int h){ gWinW = std::max(1,w); gWinH = std::max(1,h); glutPostRedisplay(); }
 
-static void keyboardCB(unsigned char key,int,int){
+static void keyboard(unsigned char key,int,int){
   if(key==27 || key=='q') std::exit(0);
   else if(key=='+'){ camDist *= 0.9f; }
   else if(key=='-'){ camDist *= 1.1f; }
@@ -493,12 +492,12 @@ static void keyboardCB(unsigned char key,int,int){
   }
 }
 
-static void mouseButtonCB(int b,int s,int x,int y){
+static void mouse(int b,int s,int x,int y){
   if(b==GLUT_LEFT_BUTTON)  lbtn = (s==GLUT_DOWN);
   if(b==GLUT_RIGHT_BUTTON) rbtn = (s==GLUT_DOWN);
   lastX=x; lastY=y;
 }
-static void mouseMotionCB(int x,int y){
+static void motion(int x,int y){
   int dx=x-lastX, dy=y-lastY; lastX=x; lastY=y;
   if(lbtn){
     yawRad   += dx * 0.005f;
@@ -512,10 +511,10 @@ static void mouseMotionCB(int x,int y){
   glutPostRedisplay();
 }
 #if defined(FREEGLUT)
-static void mouseWheelCB(int wheel,int dir,int x,int y){
+static void wheel(int wheel,int dir,int x,int y){
   (void)wheel; (void)x; (void)y;
   camDist *= (dir>0)?0.9f:1.1f;
-  camDist = std::max(0.5f, camDist);
+  camDist = std::max(0.1f, camDist);
   glutPostRedisplay();
 }
 #endif
@@ -536,13 +535,13 @@ int main(int argc,char** argv){
 
   resetScene(false);
 
-  glutDisplayFunc(displayCB);
-  glutReshapeFunc(reshapeCB);
-  glutKeyboardFunc(keyboardCB);
-  glutMouseFunc(mouseButtonCB);
-  glutMotionFunc(mouseMotionCB);
+  glutDisplayFunc(display);
+  glutReshapeFunc(reshape);
+  glutKeyboardFunc(keyboard);
+  glutMouseFunc(mouse);
+  glutMotionFunc(motion);
 #if defined(FREEGLUT)
-  glutMouseWheelFunc(mouseWheelCB);
+  glutMouseWheelFunc(wheel);
 #endif
 
   glutMainLoop();
